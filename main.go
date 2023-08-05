@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/ophum/kakeibo/controllers"
 	"github.com/ophum/kakeibo/models"
 
 	"gorm.io/driver/mysql"
@@ -42,57 +42,16 @@ func main() {
 
 	db.AutoMigrate(&models.History{})
 
+	historyController := controllers.NewHistoryController(db)
+
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:5173"}
 	r.Use(cors.New(config))
 
-	r.GET("/histories", func(ctx *gin.Context) {
-		var histories []*models.History
-		if err := db.Order("date ASC").Find(&histories).Error; err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-		res := HistoriesResponse{
-			Histories: make([]History, len(histories)),
-		}
-		for i, h := range histories {
-			res.Histories[i] = History{
-				ID:        h.ID,
-				Type:      h.Type,
-				Amount:    h.Amount,
-				Date:      h.Date,
-				CreatedAt: h.CreatedAt,
-			}
-		}
-		ctx.JSON(http.StatusOK, res)
-	})
-	r.POST("/histories", func(ctx *gin.Context) {
-		var req NewHistoryRequest
-		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
+	r.GET("/histories", historyController.FindAll)
+	r.POST("/histories", historyController.New)
 
-		history := models.History{
-			Type:      req.Type,
-			Amount:    req.Amount,
-			Date:      req.Date,
-			CreatedAt: time.Now(),
-		}
-		if err := db.Create(&history).Error; err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-
-		ctx.JSON(http.StatusCreated, History{
-			ID:        history.ID,
-			Type:      history.Type,
-			Amount:    history.Amount,
-			Date:      history.Date,
-			CreatedAt: history.CreatedAt,
-		})
-	})
 	if err := r.Run(":8080"); err != nil {
 		panic(err)
 	}
