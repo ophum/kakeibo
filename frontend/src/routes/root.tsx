@@ -1,15 +1,22 @@
-import { Button, Chip, Sheet, Table } from "@mui/joy";
+import { Button,  Sheet, Table } from "@mui/joy";
+import { useLoaderData } from "react-router-dom";
 
-const rows = [
-    {
-        id: 1,
-        date: "2023年8月4日",
-        received: 10000,
-        send: 0,
-        categories: ["給料"]
-    }
-]
+
+interface History {
+    id: number;
+    type: string;
+    amount: number;
+    date: string;
+    created_at: string;
+}
+
+interface HistoriesResponse {
+    histories: History[];
+}
+
 export default function Root() {
+    const data = useLoaderData() as HistoriesResponse;
+
     return (
         <>
             <Button component="a" href="/new">追加</Button>
@@ -21,21 +28,15 @@ export default function Root() {
                             <th>日付</th>
                             <th>入金</th>
                             <th>出金</th>
-                            <th>カテゴリ</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map(v => (
+                        {data.histories.map(v => (
                             <tr key={v.id}>
                                 <td>{v.id}</td>
                                 <td>{v.date}</td>
-                                <td>{v.received}円</td>
-                                <td>{v.send}円</td>
-                                <td>
-                                    {v.categories.map(v => (
-                                        <Chip>{v}</Chip>
-                                    ))}
-                                </td>
+                                <td>{v.type === "received" && `${v.amount}円`}</td>
+                                <td>{v.type === "send" && `${v.amount}円`}</td>
                             </tr>
                         ))}
                     </tbody>
