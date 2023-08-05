@@ -2,12 +2,14 @@ package main
 
 import (
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ophum/kakeibo/models"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type History struct {
@@ -28,16 +30,29 @@ type NewHistoryRequest struct {
 }
 
 func main() {
+	db, err := gorm.Open(mysql.Open("root:@tcp(127.0.0.1:4000)/kakeibo?charset=utf8mb4&parseTime=True&loc=Local&tls=skip-verify"))
+	if err != nil {
+		panic(err)
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+	defer sqlDB.Close()
+
+	db.AutoMigrate(&models.History{})
+
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:5173"}
 	r.Use(cors.New(config))
 
-	mu := sync.Mutex{}
-	increment := 0
-	histories := []*models.History{}
-
 	r.GET("/histories", func(ctx *gin.Context) {
+		var histories []*models.History
+		if err := db.Order("date ASC").Find(&histories).Error; err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 		res := HistoriesResponse{
 			Histories: make([]History, len(histories)),
 		}
@@ -59,17 +74,16 @@ func main() {
 			return
 		}
 
-		mu.Lock()
-		increment++
-		history := &models.History{
-			ID:        increment,
+		history := models.History{
 			Type:      req.Type,
 			Amount:    req.Amount,
 			Date:      req.Date,
 			CreatedAt: time.Now(),
 		}
-		histories = append(histories, history)
-		mu.Unlock()
+		if err := db.Create(&history).Error; err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 
 		ctx.JSON(http.StatusCreated, History{
 			ID:        history.ID,

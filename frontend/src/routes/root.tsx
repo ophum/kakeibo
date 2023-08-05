@@ -24,7 +24,6 @@ export default function Root() {
                 <Table variant="outlined">
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>日付</th>
                             <th>入金</th>
                             <th>出金</th>
@@ -33,7 +32,6 @@ export default function Root() {
                     <tbody>
                         {data.histories.map(v => (
                             <tr key={v.id}>
-                                <td>{v.id}</td>
                                 <td>{v.date}</td>
                                 <td>{v.type === "received" && `${v.amount}円`}</td>
                                 <td>{v.type === "send" && `${v.amount}円`}</td>

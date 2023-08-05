@@ -10,7 +10,7 @@ const (
 )
 
 type History struct {
-	ID        int
+	ID        int `gorm:"primaryKey;default:auto_random()"`
 	Type      HistoryType
 	Amount    int
 	Date      time.Time
