@@ -22,9 +22,9 @@ type HistoriesResponse struct {
 }
 
 type NewHistoryRequest struct {
-	Type   models.HistoryType `json:"type"`
-	Amount int                `json:"amount"`
-	Date   time.Time          `json:"date"`
+	Type   models.HistoryType `json:"type" binding:"required,oneof=received send"`
+	Amount int                `json:"amount" binding:"required"`
+	Date   time.Time          `json:"date" binding:"required"`
 }
 
 func main() {

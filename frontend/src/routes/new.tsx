@@ -1,6 +1,6 @@
 import { Button, FormControl, FormLabel, Input, Radio, RadioGroup } from "@mui/joy";
 import { Controller, useForm } from "react-hook-form";
-import { useSubmit } from "react-router-dom";
+import { useActionData, useSubmit } from "react-router-dom";
 
 interface NewFormInput {
     date: Date;
@@ -9,6 +9,7 @@ interface NewFormInput {
 }
 
 export default function New() {
+    const res = useActionData() as {status: number};
     const form = useForm<NewFormInput>({
         defaultValues: {
             type: "send"
@@ -22,6 +23,7 @@ export default function New() {
         }, {method: "post", action: "/new"})
     };
     return (<div>
+        {res && (<p>{res.status}</p>)}
         <form onSubmit={form.handleSubmit(onSubmit)} method="post">
             <FormControl>
                 <FormLabel>日付</FormLabel>
@@ -32,7 +34,7 @@ export default function New() {
             <FormControl>
                 <Controller name="type" control={form.control} render={({ field }) => (
                     <RadioGroup {...field}>
-                        <Radio label="入金" value="receive" />
+                        <Radio label="入金" value="received" />
                         <Radio label="出金" value="send" />
                     </RadioGroup>
                 )} />
