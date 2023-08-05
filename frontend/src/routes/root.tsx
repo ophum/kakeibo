@@ -32,7 +32,7 @@ export default function Root() {
                     <tbody>
                         {data.histories.map(v => (
                             <tr key={v.id}>
-                                <td>{v.date}</td>
+                                <td>{(new Date(v.date)).toISOString().split("T", 1)[0]}</td>
                                 <td>{v.type === "received" && `${v.amount}円`}</td>
                                 <td>{v.type === "send" && `${v.amount}円`}</td>
                             </tr>
