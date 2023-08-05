@@ -3,19 +3,25 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Root from "./routes/root";
 import New from "./routes/new";
-import { rootLoader } from "./routes/loaders";
+import { listLoader } from "./routes/loaders";
 import { newAction } from "./routes/actions";
+import List from "./routes/list";
 
-const router =  createBrowserRouter([
+const router = createBrowserRouter([
   {
-    path: "/",
     element: <Root />,
-    loader: rootLoader
-  },
-  {
-    path: "/new",
-    element: <New />,
-    action: newAction
+    children: [
+      {
+        index: true,
+        element: <List />,
+        loader: listLoader,
+      },
+      {
+        path: "/new",
+        element: <New />,
+        action: newAction
+      }
+    ]
   },
 ]);
 

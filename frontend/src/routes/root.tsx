@@ -1,45 +1,15 @@
-import { Button,  Sheet, Table } from "@mui/joy";
-import { useLoaderData } from "react-router-dom";
+import { Sheet, Stack } from "@mui/joy";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
-
-interface History {
-    id: number;
-    type: string;
-    amount: number;
-    date: string;
-    created_at: string;
-}
-
-interface HistoriesResponse {
-    histories: History[];
-}
 
 export default function Root() {
-    const data = useLoaderData() as HistoriesResponse;
-
     return (
-        <>
-            <Button component="a" href="/new">追加</Button>
-            <Sheet>
-                <Table variant="outlined">
-                    <thead>
-                        <tr>
-                            <th>日付</th>
-                            <th>入金</th>
-                            <th>出金</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.histories.map(v => (
-                            <tr key={v.id}>
-                                <td>{(new Date(v.date)).toISOString().split("T", 1)[0]}</td>
-                                <td>{v.type === "received" && `${v.amount}円`}</td>
-                                <td>{v.type === "send" && `${v.amount}円`}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+        <Stack direction="row" spacing={1}>
+            <Sidebar />
+            <Sheet sx={{width: "calc(100% - 240px)", height: "100dvh"}}>
+                <Outlet />
             </Sheet>
-        </>
+        </Stack>
     )
 }
